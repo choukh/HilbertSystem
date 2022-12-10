@@ -1,0 +1,3 @@
+name: hilbert-style-prop-logic
+depend: standard-library
+include: src
