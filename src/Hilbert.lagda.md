@@ -1,16 +1,16 @@
 ---
-title: Agda命题逻辑(1) 希尔伯特流
+title: Agda命题逻辑(1) 希尔伯特系统
 zhihu-tags: Agda, 数理逻辑
 ---
 
-# Agda命题逻辑(1) 希尔伯特流
+# Agda命题逻辑(1) 希尔伯特系统
 
 > 交流Q群: 893531731  
-> 本文源码: [Hilbert.lagda.md](https://github.com/choukh/hilbert-style-prop-logic/blob/main/src/Hilbert.lagda.md)  
-> 高亮渲染: [Hilbert.html](https://choukh.github.io/hilbert-style-prop-logic/Hilbert.html)  
+> 本文源码: [Hilbert.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Hilbert.lagda.md)  
+> 高亮渲染: [Hilbert.html](https://choukh.github.io/hilbert-prop/Hilbert.html)  
 > 如果你在知乎看到本文: 知乎对Agda语法高亮的支持非常有限, 建议跳转到以上网站阅读  
 
-## 1.0 前言
+## 0 前言
 
 - 本文以 Agda 为元逻辑, 建立希尔伯特风格的命题逻辑系统
 - 我们默认读者熟悉 Agda 及其标准库
@@ -44,11 +44,11 @@ infix 15 _⊃_ _+_
 infix 10 _|≟_ _⊨_ _⊭_ ⊨_ ⊭_ _⊨ₘ_ _⊨ₜ_ _⊭ₜ_ _⊢_ ⊢_ ⊬_
 ```
 
-## 1.1 命题逻辑的公式及理论
+## 1 命题逻辑的公式及理论
 
-在命题逻辑中我们认为命题的最基本的构成要素是一种不可再分的原子命题. 我们需要一些符号来表示原子命题.
+在命题逻辑中, 我们认为命题的最基本的构成要素是一些不可再分的原子命题, 我们需要一些符号来表示它们.
 
-**定义 1.1.1** 设 Variable 为非空集合, Variable 的元素叫做命题变元.
+**[定义 1.1]** 设 Variable 为非空集合, Variable 的元素叫做命题变元.
 
 很难再进一步解释何为命题变元, 只需认为它们是一些可以相互区分[^1]的符号就足够了. 形式化地, 简单起见, 不妨以自然数集为 Variable.
 
