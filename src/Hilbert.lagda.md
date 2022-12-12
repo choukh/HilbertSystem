@@ -12,9 +12,9 @@ zhihu-tags: Agda, 数理逻辑
 
 ## 0 前言
 
-- 本文以 Agda 为元逻辑, 建立希尔伯特风格的命题逻辑系统
-- 我们默认读者熟悉 Agda 及其标准库
-- 除去代码部分, 本文尽可能以传统数理逻辑入门书的风格撰写
+- 本文以 Agda 为元逻辑, 建立希尔伯特风格的命题逻辑系统.
+- 我们默认读者熟悉 Agda 及其标准库.
+- 除去代码部分, 本文尽可能以传统数理逻辑入门书的风格撰写.
 
 ```agda
 {-# OPTIONS --without-K --safe #-}
@@ -26,6 +26,7 @@ module Hilbert where
 
 ```agda
 open import Data.Bool using (Bool; true; false; not)
+open import Data.Bool.Properties renaming (not-injective to not-inj)
 open import Data.Nat using (ℕ)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -44,19 +45,30 @@ infix 15 _⊃_ _+_
 infix 10 _|≟_ _⊨_ _⊭_ ⊨_ ⊭_ _⊨ₘ_ _⊨ₜ_ _⊭ₜ_ _⊢_ ⊢_ ⊬_
 ```
 
-## 1 命题逻辑的公式及理论
+## 1 命题逻辑的表达式
 
 在命题逻辑中, 我们认为命题的最基本的构成要素是一些不可再分的原子命题, 我们需要一些符号来表示它们.
 
-**[定义 1.1]** 设 Variable 为非空集合, Variable 的元素叫做命题变元.
+**[定义1.1]** 设 Variable 为非空集合, Variable 的元素叫做命题变元 (propositional variable).
 
-很难再进一步解释何为命题变元, 只需认为它们是一些可以相互区分[^1]的符号就足够了. 形式化地, 简单起见, 不妨以自然数集为 Variable.
+很难再进一步解释何为命题变元, 只需认为它们是一些可以相互区分[^1]的符号就足够了. 形式地, 简单起见, 不妨以自然数集为 Variable.
 
-[^1]: _ 对应于 Agda 构造主义逻辑中的 [decidable equality](https://ncatlab.org/nlab/show/decidable+equality)
+[^1]: _ 对应于我们的构造主义元逻辑中的 [decidable equality](https://ncatlab.org/nlab/show/decidable+equality)
 
 ```agda
 Variable = ℕ
 ```
+
+逻辑运算符 (propositional connective) 用于连接已有的命题得到新的命题. 命题逻辑一般使用"非", "且", "或", "若...则..."这四种, 分别记作 ¬, ∧, ∨, →. 然而, 这四种并不是相互独立的. 例如, 在一般数学中, "A且B"与"非A或非B"同义, "若A则B"与"非A, 或B"同义[^2], 因此只需要"非"和"或"两种就足够了. 类似地, 用"非"和"若...则..."这两种也可以表示"且"和"或". 简单起见我们只使用"非"和"若...则..."这两种. 由于与元语言符号冲突, 我们采用复古符号 ~ 和 ⊃.
+
+[^2]: _ 若有违和感, 都是自然语言的锅. 数学中的"若...则..."仅取分情况讨论之义, 而自然语言中并不是只有这一种用法.
+
+**[定义1.2]** 命题变元以及用逻辑运算符将它们按一定规则连接在一起得到的式子叫做公式 (formula), 也叫逻辑表达式. 具体地
+
+(1) 如果 `n` 是命题变元, 那么 `var n` 是公式.  
+(2) 如果 `φ` 是公式, 那么 `~ φ` 也是公式.  
+(3) 如果 `φ` 和 `ψ` 是公式, 那么 `φ ⊃ ψ` 也是公式.  
+(4) 只有符合以上规则的才是公式.  
 
 ```agda
 data Formula : Set where
@@ -65,29 +77,51 @@ data Formula : Set where
   _⊃_ : Formula → Formula → Formula
 ```
 
-```agda
-Theory = Formula → Set
+**【注意1.3】** 非形式地, 可以认为单独的命题变元就是公式. 形式地, 需要 `var` 将 `Variable` 类型转换成 `Formula` 类型.
 
-∅ : Formula → Set
-∅ = λ _ → ⊥
+**【注意1.4】** 有些书会说括号也是公式的一部分, 只是在无歧义的情况下可以省略. 本文实际上也是如此. 例如 `~ φ` 是 `(~ φ)` 的省略. 这是元语言规则的一部分. 此外我们有文章开头处声明的符号优先级来决定 `_~_` 和 `_⊃_` 交互时如何省略括号. 例如, 由于 `_~_` 的优先级比 `_⊃_` 高, `~ A ⊃ B` 与 `(~ A) ⊃ B` 同义, 而与 `~ (A ⊃ B)` 不同. 后文其他符号的交互也类似.
+
+**【注意1.5】** 即使公式表示了命题, 将公式与命题联系起来的还是人, 公式只是单纯的符号串. 可以认为, 命题是哲学对象而非数学对象, 符号串才是数学对象. 公式与命题的区分是数理逻辑特有的思考方式, 也是作为数学的数理逻辑的出发点.
+
+**【注意1.6】** 形如1.2的定义也叫归纳定义. 如果要证明所有公式都具有某个性质 P, 按公式的归纳定义只需证明以下3条:
+
+(1) 对任意 `n`, `var n` 满足 P.  
+(2) 如果 `φ` 满足 P, 那么 `~ φ` 满足 P.  
+(3) 如果 `φ` 和 `ψ` 满足 P, 那么 `φ ⊃ ψ` 满足 P.  
+
+这种形式的证明叫做关于公式复杂度的归纳法.
+
+### 小结
+
+尽管后文为了行文的方便会将以下概念混同, 我们在此统一澄清它们的区分.
+
+|哲学|数理逻辑|形式化|
+|---|-------|-----|
+|原子命题|命题变元|`Variable`|
+|逻辑运算符|¬, →|`~_`, `_⊃_`|
+|命题|公式|`Formula`|
+
+## 2 真值
+
+由上一节我们知道, 公式是形式地表示命题的符号串. 而命题是可以确定真假的数学主张, 我们还需要建立公式与真假的联系. 由于命题是原子命题与逻辑运算符的组合, 且逻辑运算符的语义是明确的, 只要确定了原子命题的真假就可以确定所有命题的真假. 又, 原子命题由命题变元表示, 命题由公式表示. 于是只要确定了命题变元的真假就可以确定所有公式的真假. 我们认为命题变元可以用如下方式规定它们的真假.
+
+**[定义1.7]** (1) 可以相互区分的两个符号 `true` 和 `false` 叫做真值. 其中 `true` 表示真, `false` 表示假.  
+(2) 从命题变元全体的集合 `Variable` 到真值的集合 `Bool` 的函数叫做真值指派 (truth assignment), 也叫赋值 (valuation) 或指派 (assignment). 真值指派全体的集合叫做 `Assignment`.
+
+```agda
+Assignment = Variable → Bool
 ```
 
-```agda
-[_,_] : Formula → Formula → Theory
-[ φ , ψ ] ξ = ξ ≡ φ ⊎ ξ ≡ ψ
-```
+给定真值指派 `v`, 按逻辑运算符的语义, 从简单公式到复杂公式的真值就顺次确定了. 例如将命题变元 `0` 指派为真, 那么公式 `~ (var 0)` 就应该估值为假. 具体地
+
+**[定义1.8]** 给定真值指派 `v`, 归纳定义公式的真值如下:
+
+(1) 在 `v` 下 `var n` 的真值与 `v n` 相同, 记作 `v |≟ (var n)`.  
+(2) `v |≟ (~ φ)` 的值与 `v |≟ φ` 相反.  
+(3) 如果 `v |≟ φ` 为 `true` 且 `v |≟ ψ` 为 `false`, 那么 `v |≟ (φ ⊃ ψ)` 为 `false`. 除此之外 `v |≟ (φ ⊃ ψ)` 都为 `true`.
 
 ```agda
-_+_ : Theory → Formula → Theory
-(T + φ) ξ = T ξ ⊎ ξ ≡ φ
-```
-
-```agda
-Model = Variable → Bool
-```
-
-```agda
-_|≟_ : Model → (Formula → Bool)
+_|≟_ : Assignment → (Formula → Bool)
 v |≟ (var n) = v n
 v |≟ (~ φ) = not (v |≟ φ)
 v |≟ (φ ⊃ ψ) with v |≟ φ | v |≟ ψ
@@ -95,31 +129,42 @@ v |≟ (φ ⊃ ψ) with v |≟ φ | v |≟ ψ
 ...             | _      | _      = true
 ```
 
-```agda
-_⊨_ : Model → Formula → Set
-v ⊨ φ = v |≟ φ ≡ true
-```
+**[定义1.9]** 给定真值指派 `v` 和公式 `φ`. 当 `v |≟ φ` 为 `true` 时我们说 `φ` 在 `v` 下为真, 记作 `v ⊨ φ`. 当 `v |≟ φ` 为 `false` 时我们说 `φ` 在 `v` 下为假, 记作 `v ⊭ φ`.
 
 ```agda
-_⊭_ : Model → Formula → Set
+_⊨_ : Assignment → Formula → Set
+v ⊨ φ = v |≟ φ ≡ true
+
+_⊭_ : Assignment → Formula → Set
 v ⊭ φ = v |≟ φ ≡ false
 ```
 
+由定义, 以下引理显然成立.
+
+**[引理1.10]** `v ⊨ ~ φ` 等价于 `v ⊭ φ`.
+
 ```agda
+v⊨~φ⇒v⊭φ : ∀ v φ → v ⊨ ~ φ → v ⊭ φ
+v⊨~φ⇒v⊭φ v φ v⊨~φ = not-inj v⊨~φ
+
 v⊭φ⇒v⊨~φ : ∀ v φ → v ⊭ φ → v ⊨ ~ φ
 v⊭φ⇒v⊨~φ v φ v⊭φ rewrite v⊭φ = refl
-
-v⊨~φ⇒v⊭φ : ∀ v φ → v ⊨ ~ φ → v ⊭ φ
-v⊨~φ⇒v⊭φ v φ v⊨~φ with v |≟ φ | v⊨~φ
-... | true  | ()
-... | false | _ = refl
 ```
 
+**[引理1.11]** `v ⊨ φ` 和 `v ⊭ φ` 中有且只有一个成立.
+
 ```agda
+⊨⊎⊭ : ∀ v φ → v ⊨ φ ⊎ v ⊭ φ
+⊨⊎⊭ v φ with v |≟ φ
+...        | true  = inj₁ refl
+...        | false = inj₂ refl
+
 ⊨⇒⊭⇒⊥ : ∀ v φ → v ⊨ φ → v ⊭ φ → ⊥
 ⊨⇒⊭⇒⊥ v φ v⊨φ v⊭φ rewrite v⊨φ with v⊭φ
 ... | ()
 ```
+
+**[定义1.12]** 给定 `φ`, 对任意 `v` 都有 `v ⊨ φ` 时, 我们就说 `φ` 是恒真式 (tautological formula), 也叫重言式, 记作 `⊨ φ`. 存在 `v` 使得 `v ⊭ φ` 时, 我们说 `φ` 不是恒真式, 记作 `⊭ φ`.
 
 ```agda
 ⊨_ : Formula → Set
@@ -157,7 +202,24 @@ Tauto3 φ ψ v with v |≟ φ | v |≟ ψ
 ```
 
 ```agda
-_⊨ₘ_ : Model → Theory → Set
+Theory = Formula → Set
+
+∅ : Formula → Set
+∅ = λ _ → ⊥
+```
+
+```agda
+[_,_] : Formula → Formula → Theory
+[ φ , ψ ] ξ = ξ ≡ φ ⊎ ξ ≡ ψ
+```
+
+```agda
+_+_ : Theory → Formula → Theory
+(T + φ) ξ = T ξ ⊎ ξ ≡ φ
+```
+
+```agda
+_⊨ₘ_ : Assignment → Theory → Set
 v ⊨ₘ T = ∀ φ → T φ → v ⊨ φ
 
 _⊨ₜ_ : Theory → Formula → Set
