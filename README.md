@@ -10,7 +10,8 @@
 
 ### [Hilbert.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Hilbert.lagda.md)
 
-- TODO
+- Definition of `_⊨_` and `_⊢_`
+- Proof of soundness
 
 ## License
 
