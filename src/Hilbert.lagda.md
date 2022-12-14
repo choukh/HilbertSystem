@@ -379,43 +379,51 @@ data _⊢_ (T : Theory) : Formula → Set where
   MP : ∀ φ ψ → T ⊢ φ → T ⊢ φ ⊃ ψ → T ⊢ ψ
 ```
 
+如定义4.1所说, `∅ ⊢ φ` 简记作 `⊢ φ`. `⊢ φ` 不成立时记作 `⊬ φ`.
+
 ```agda
 ⊢_ : Formula → Set
 ⊢ φ = ∅ ⊢ φ
 
 ⊬_ : Formula → Set
-⊬ φ = ¬ ∅ ⊢ φ
+⊬ φ = ¬ ⊢ φ
 ```
+
+容易验证
+
+**[引理4.3]** MP 是演绎推理.  
 
 ```agda
 MP-deductive : ∀ v φ ψ → v ⊨ φ → v ⊨ φ ⊃ ψ → v ⊨ ψ
 MP-deductive v φ ψ v⊨φ v⊨φ⊃ψ
   with v |≟ φ | v |≟ ψ | v⊨φ | v⊨φ⊃ψ
-...  | _     | true  | _   | _     = refl
-...  | true  | false | _   | ()
-...  | false | false | ()  | _
+...  | _      | true   | _   | _     = refl
+...  | true   | false  | _   | ()
+...  | false  | false  | ()  | _
 ```
 
+**【注意4.4】** 
+
 ```agda
-soundness : ∀ v T φ → v ⊨ₘ T → T ⊢ φ → v ⊨ φ
-soundness v _ _ _ (Ax1 φ ψ)   = Tauto1 φ ψ v
-soundness v _ _ _ (Ax2 φ ψ ρ) = Tauto2 φ ψ ρ v
-soundness v _ _ _ (Ax3 φ ψ)   = Tauto3 φ ψ v
-soundness _ _ φ v⊨T (AxT φ φ∈T) = v⊨T φ φ∈T
-soundness v T ψ v⊨T (MP φ ψ T⊢ψ T⊢φ⊃ψ) =
+T⊢φ⇒v⊨φ : ∀ v T φ → v ⊨ₘ T → T ⊢ φ → v ⊨ φ
+T⊢φ⇒v⊨φ v _ _ _ (Ax1 φ ψ)   = Tauto1 φ ψ v
+T⊢φ⇒v⊨φ v _ _ _ (Ax2 φ ψ ρ) = Tauto2 φ ψ ρ v
+T⊢φ⇒v⊨φ v _ _ _ (Ax3 φ ψ)   = Tauto3 φ ψ v
+T⊢φ⇒v⊨φ _ _ φ v⊨T (AxT φ φ∈T) = v⊨T φ φ∈T
+T⊢φ⇒v⊨φ v T ψ v⊨T (MP φ ψ T⊢ψ T⊢φ⊃ψ) =
   MP-deductive v φ ψ v⊨φ v⊨φ⊃ψ where
-  v⊨φ   = soundness v T φ       v⊨T T⊢ψ
-  v⊨φ⊃ψ = soundness v T (φ ⊃ ψ) v⊨T T⊢φ⊃ψ
+  v⊨φ   = T⊢φ⇒v⊨φ v T φ       v⊨T T⊢ψ
+  v⊨φ⊃ψ = T⊢φ⇒v⊨φ v T (φ ⊃ ψ) v⊨T T⊢φ⊃ψ
 ```
 
 ```agda
-T⊢φ⇒T⊨φ : ∀ T φ → T ⊢ φ → T ⊨ₜ φ
-T⊢φ⇒T⊨φ T φ T⊢φ v v⊨T = soundness v T φ v⊨T T⊢φ
+soundness : ∀ T φ → T ⊢ φ → T ⊨ₜ φ
+soundness T φ T⊢φ v v⊨T = T⊢φ⇒v⊨φ v T φ v⊨T T⊢φ
 ```
 
 ```agda
 tauto-theory : ∀ T → (∀ φ → T φ → ⊨ φ) → ∀ φ → T ⊢ φ → ⊨ φ
-tauto-theory T H φ T⊢φ v = soundness v T φ (λ φ φ∈T → H φ φ∈T v) T⊢φ
+tauto-theory T H φ T⊢φ v = T⊢φ⇒v⊨φ v T φ (λ φ φ∈T → H φ φ∈T v) T⊢φ
 ```
 
 ```agda
