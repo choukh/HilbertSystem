@@ -1,6 +1,7 @@
 ---
 title: Agda命题逻辑(1) 希尔伯特系统
-zhihu-tags: Agda, 数理逻辑
+zhihu-tags: Agda, 数理逻辑, 数理逻辑（Mathematical Logic）
+zhihu-url: https://zhuanlan.zhihu.com/p/591923085
 ---
 
 # Agda命题逻辑(1) 希尔伯特系统
@@ -155,13 +156,13 @@ v⊭φ⇒v⊨~φ v φ v⊭φ rewrite v⊭φ = refl
 **[引理2.5]** `v ⊨ᵥ φ` 和 `v ⊭ᵥ φ` 中有且只有一个成立.
 
 ```agda
-⊨⊎⊭ : ∀ v φ → v ⊨ᵥ φ ⊎ v ⊭ᵥ φ
-⊨⊎⊭ v φ with v |≟ φ
+v⊨φ⊎v⊭φ : ∀ v φ → v ⊨ᵥ φ ⊎ v ⊭ᵥ φ
+v⊨φ⊎v⊭φ v φ with v |≟ φ
 ...        | true  = inj₁ refl
 ...        | false = inj₂ refl
 
-⊨⇒⊭⇒⊥ : ∀ v φ → v ⊨ᵥ φ → v ⊭ᵥ φ → ⊥
-⊨⇒⊭⇒⊥ v φ v⊨φ v⊭φ rewrite v⊨φ with v⊭φ
+v⊨φ⇒v⊭φ⇒⊥ : ∀ v φ → v ⊨ᵥ φ → v ⊭ᵥ φ → ⊥
+v⊨φ⇒v⊭φ⇒⊥ v φ v⊨φ v⊭φ rewrite v⊨φ with v⊭φ
 ... | ()
 ```
 
@@ -321,15 +322,15 @@ _ = λ T ¬v⊨T φ v v⊨T → ⊥-elim (¬v⊨T v v⊨T)
 (2) `v` 是 `T` 的模型且 `φ` 在 `v` 下为真.  
 
 ```agda
-v⊨T+φ⇒v⊨T : ∀ {v T} φ → v ⊨ₘ T + φ → v ⊨ₘ T
-v⊨T+φ⇒v⊨T φ v⊨ ψ ψ∈T = v⊨ ψ (inj₁ ψ∈T)
++-elimˡ : ∀ {v T} φ → v ⊨ₘ T + φ → v ⊨ₘ T
++-elimˡ φ v⊨ ψ ψ∈T = v⊨ ψ (inj₁ ψ∈T)
 
-v⊨T+φ⇒v⊨φ : ∀ {v T} φ → v ⊨ₘ T + φ → v ⊨ᵥ φ
-v⊨T+φ⇒v⊨φ φ v⊨ = v⊨ φ (inj₂ refl)
++-elimʳ : ∀ {v T} φ → v ⊨ₘ T + φ → v ⊨ᵥ φ
++-elimʳ φ v⊨ = v⊨ φ (inj₂ refl)
 
-v⊨T×v⊨φ⇒v⊨T+φ : ∀ {v T φ} → v ⊨ₘ T → v ⊨ᵥ φ → v ⊨ₘ T + φ
-v⊨T×v⊨φ⇒v⊨T+φ v⊨T v⊨φ ψ (inj₁ ψ∈T)  = v⊨T ψ ψ∈T
-v⊨T×v⊨φ⇒v⊨T+φ v⊨T v⊨φ ψ (inj₂ refl) = v⊨φ
++-intro : ∀ {v T φ} → v ⊨ₘ T → v ⊨ᵥ φ → v ⊨ₘ T + φ
++-intro v⊨T v⊨φ ψ (inj₁ ψ∈T)  = v⊨T ψ ψ∈T
++-intro v⊨T v⊨φ ψ (inj₂ refl) = v⊨φ
 ```
 
 **[引理3.10]** 对任意公式 `φ`, 以下 (1) 和 (2) 等价.
@@ -342,11 +343,11 @@ v⊨T×v⊨φ⇒v⊨T+φ v⊨T v⊨φ ψ (inj₂ refl) = v⊨φ
 ```agda
 v⊨T+~φ⇒T⊭φ : ∀ v T φ → v ⊨ₘ T + ~ φ → T ⊭ φ
 v⊨T+~φ⇒T⊭φ v T φ v⊨ = v , v⊨T , v⊭φ where
-  v⊨T = v⊨T+φ⇒v⊨T (~ φ) v⊨
-  v⊭φ = v⊨~φ⇒v⊭φ v φ (v⊨T+φ⇒v⊨φ (~ φ) v⊨)
+  v⊨T = +-elimˡ (~ φ) v⊨
+  v⊭φ = v⊨~φ⇒v⊭φ v φ (+-elimʳ (~ φ) v⊨)
 
 T⊭φ⇒v⊨T+~φ : ∀ T φ → T ⊭ φ → ∃[ v ] v ⊨ₘ T + ~ φ
-T⊭φ⇒v⊨T+~φ T φ (v , v⊨T , v⊭φ) = v , v⊨T×v⊨φ⇒v⊨T+φ v⊨T v⊨~φ where
+T⊭φ⇒v⊨T+~φ T φ (v , v⊨T , v⊭φ) = v , +-intro v⊨T v⊨~φ where
   v⊨~φ = v⊭φ⇒v⊨~φ v φ v⊭φ
 ```
 
