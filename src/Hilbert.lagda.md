@@ -7,6 +7,7 @@ zhihu-url: https://zhuanlan.zhihu.com/p/591923085
 # Agda命题逻辑(1) 希尔伯特系统
 
 > 交流Q群: 893531731  
+> 目录: [Everything.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Everything.lagda.md)  
 > 本文源码: [Hilbert.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Hilbert.lagda.md)  
 > 高亮渲染: [Hilbert.html](https://choukh.github.io/hilbert-prop/Hilbert.html)  
 > 如果你在知乎看到本文: 知乎对Agda语法高亮的支持非常有限, 建议跳转到以上网站阅读  
@@ -328,9 +329,9 @@ _ = λ T ¬v⊨T φ v v⊨T → ⊥-elim (¬v⊨T v v⊨T)
 +-elimʳ : ∀ {v T} φ → v ⊨ₘ T + φ → v ⊨ᵥ φ
 +-elimʳ φ v⊨ = v⊨ φ (inj₂ refl)
 
-+-intro : ∀ {v T φ} → v ⊨ₘ T → v ⊨ᵥ φ → v ⊨ₘ T + φ
-+-intro v⊨T v⊨φ ψ (inj₁ ψ∈T)  = v⊨T ψ ψ∈T
-+-intro v⊨T v⊨φ ψ (inj₂ refl) = v⊨φ
++-intro : ∀ {v T} φ → v ⊨ₘ T → v ⊨ᵥ φ → v ⊨ₘ T + φ
++-intro φ v⊨T v⊨φ ψ (inj₁ ψ∈T)  = v⊨T ψ ψ∈T
++-intro φ v⊨T v⊨φ ψ (inj₂ refl) = v⊨φ
 ```
 
 **[引理3.10]** 对任意公式 `φ`, 以下 (1) 和 (2) 等价.
@@ -347,7 +348,7 @@ v⊨T+~φ⇒T⊭φ v T φ v⊨ = v , v⊨T , v⊭φ where
   v⊭φ = v⊨~φ⇒v⊭φ v φ (+-elimʳ (~ φ) v⊨)
 
 T⊭φ⇒v⊨T+~φ : ∀ T φ → T ⊭ φ → ∃[ v ] v ⊨ₘ T + ~ φ
-T⊭φ⇒v⊨T+~φ T φ (v , v⊨T , v⊭φ) = v , +-intro v⊨T v⊨~φ where
+T⊭φ⇒v⊨T+~φ T φ (v , v⊨T , v⊭φ) = v , +-intro (~ φ) v⊨T v⊨~φ where
   v⊨~φ = v⊭φ⇒v⊨~φ v φ v⊭φ
 ```
 
@@ -475,14 +476,14 @@ tauto-theory T H φ T⊢φ v = T⊢φ⇒v⊨φ v T φ (λ φ φ∈T → H φ φ�
 
 $\mathfrak{S}_0$ 由于形式相对简单, 方便证明元定理, 如上面的 `soundness`, 而不方便证明 $\mathfrak{S}_0$ 的内定理, 如下面的引理.
 
-**[引理4.9]** 对任意公式 `φ` 都有 `⊢ φ ⊃ φ`.  
+**[引理4.9]** 对任意理论 `T` 和公式 `φ` 都有 `⊢ φ ⊃ φ`.  
 证明: 如代码, 其理解留作练习. ∎
 
 ```agda
-⊢φ⊃φ : ∀ φ → ⊢ φ ⊃ φ
-⊢φ⊃φ φ =      MP _ _
-            --/\
-      (Ax1 φ φ) (MP _ _
+T⊢φ⊃φ : ∀ {T φ} → T ⊢ φ ⊃ φ
+T⊢φ⊃φ {T} {φ} = MP _ _
+              --/\
+       (Ax1 φ φ) (MP _ _
                --/\
   (Ax1 φ (φ ⊃ φ)) (Ax2 φ (φ ⊃ φ) φ))
 ```
@@ -510,7 +511,7 @@ module _ (m : Variable) where
     A⇒B ⊢A = ⊥-elim (⊬A ⊢A)
 ```
 
-**【注意4.13】** `T ⊢ φ ⊃ ψ` 时有 `T ⊢ φ` 蕴涵 `T ⊢ ψ`. 反之则不一定成立. 例如 `A ⊃ B` 不是恒真式.
+**【注意4.13】** `T ⊢ φ ⊃ ψ` 时有 `T ⊢ φ` 蕴涵 `T ⊢ ψ`. 反之则不一定成立. 例如 `⊢ A → ⊢ B` 成立但 `A ⊃ B` 不是恒真式.
 
 ```agda
 φ⊃ψ⇒φ⇒ψ : ∀ T φ ψ → T ⊢ φ ⊃ ψ → T ⊢ φ → T ⊢ ψ
