@@ -239,7 +239,7 @@ Theory = Formula → Set
 ∅ _ = ⊥
 ```
 
-给定理论 `T`. `T` 的非逻辑公理有时就简称为公理 (axiom). 理论又叫形式理论 (formal theory) 或公理系统 (axiom system). 给定公式 `φ` 和 `ψ`, 由它们组成的理论记作 `[ φ , ψ ]`.
+给定理论 `T`. `T` 的非逻辑公理有时就简称为公理 (axiom). 理论又叫形式理论 (formal theory) 或公理系统 (axiom system). 给定公式 `φ` 和 `ψ`, 由它们组成的理论记作 `｛ φ , ψ ｝`.
 
 ```agda
 ｛_,_｝ : Formula → Formula → Theory
