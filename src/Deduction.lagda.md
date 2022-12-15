@@ -6,7 +6,7 @@ zhihu-tags: Agda, 数理逻辑, 数理逻辑（Mathematical Logic）
 # Agda命题逻辑(2) 演绎定理与一致性
 
 > 交流Q群: 893531731  
-> 目录: [Everything.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Everything.lagda.md)  
+> 目录: [Everything.html](https://choukh.github.io/hilbert-prop/Everything.html)  
 > 本文源码: [Deduction.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Deduction.lagda.md)  
 > 高亮渲染: [Deduction.html](https://choukh.github.io/hilbert-prop/Deduction.html)  
 > 如果你在知乎看到本文: 知乎对Agda语法高亮的支持非常有限, 建议跳转到以上网站阅读  
