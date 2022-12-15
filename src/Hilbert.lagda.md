@@ -127,8 +127,8 @@ _|≟_ : Assignment → Formula → Bool
 v |≟ (var n) = v n
 v |≟ ~ φ = not (v |≟ φ)
 v |≟ φ ⊃ ψ with v |≟ φ | v |≟ ψ
-...             | true   | false  = false
-...             | _      | _      = true
+...           | true   | false  = false
+...           | _      | _      = true
 ```
 
 **〔定义2.3〕** 给定真值指派 `v` 和公式 `φ`. 当 `v |≟ φ` 为 `true` 时我们说 `φ` 在 `v` 下为真, 记作 `v ⊨ᵥ φ`. 当 `v |≟ φ` 为 `false` 时我们说 `φ` 在 `v` 下为假, 记作 `v ⊭ᵥ φ`.
@@ -158,8 +158,8 @@ v⊭φ⇒v⊨~φ v φ v⊭φ rewrite v⊭φ = refl
 ```agda
 v⊨φ⊎v⊭φ : ∀ v φ → v ⊨ᵥ φ ⊎ v ⊭ᵥ φ
 v⊨φ⊎v⊭φ v φ with v |≟ φ
-...        | true  = inj₁ refl
-...        | false = inj₂ refl
+...            | true  = inj₁ refl
+...            | false = inj₂ refl
 
 v⊨φ⇒v⊭φ⇒⊥ : ∀ v φ → v ⊨ᵥ φ → v ⊭ᵥ φ → ⊥
 v⊨φ⇒v⊭φ⇒⊥ v φ v⊨φ v⊭φ rewrite v⊨φ with v⊭φ
@@ -200,28 +200,28 @@ Agda 的证明与真值表有类似的形式. 另外两条公式的证明也是�
 ```agda
 Tauto1 : ∀ φ ψ → ⊨ᵥ φ ⊃ (ψ ⊃ φ)
 Tauto1 φ ψ v with v |≟ φ | v |≟ ψ
-...             | true  | true  = refl
-...             | true  | false = refl
-...             | false | true  = refl
-...             | false | false = refl
+...             | true   | true  = refl
+...             | true   | false = refl
+...             | false  | true  = refl
+...             | false  | false = refl
 
 Tauto2 : ∀ φ ψ ρ → ⊨ᵥ (φ ⊃ (ψ ⊃ ρ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ ρ))
 Tauto2 φ ψ ρ v with v |≟ φ | v |≟ ψ | v |≟ ρ
-...               | true  | true  | true  = refl
-...               | true  | true  | false = refl
-...               | true  | false | true  = refl
-...               | true  | false | false = refl
-...               | false | true  | true  = refl
-...               | false | true  | false = refl
-...               | false | false | true  = refl
-...               | false | false | false = refl
+...               | true   | true   | true  = refl
+...               | true   | true   | false = refl
+...               | true   | false  | true  = refl
+...               | true   | false  | false = refl
+...               | false  | true   | true  = refl
+...               | false  | true   | false = refl
+...               | false  | false  | true  = refl
+...               | false  | false  | false = refl
 
 Tauto3 : ∀ φ ψ → ⊨ᵥ (~ φ ⊃ ~ ψ) ⊃ (ψ ⊃ φ)
 Tauto3 φ ψ v with v |≟ φ | v |≟ ψ
-...             | true  | true  = refl
-...             | true  | false = refl
-...             | false | true  = refl
-...             | false | false = refl
+...             | true   | true  = refl
+...             | true   | false = refl
+...             | false  | true  = refl
+...             | false  | false = refl
 ```
 
 **【注意2.9】** 对任意公式, 都有确定性 (deterministic) 步骤可以写出其真值表. 但是, 对含 n 个命题变元的公式需要写 2ⁿ 行. 当 n 很大时需要花费很长的时间才能判断其真值. 真值的计算是确定性的但低效的.
@@ -384,11 +384,11 @@ $$\dfrac{φ\;\;φ ⊃ ψ}{ψ} \\$$
 
 ```agda
 data _⊢_ (T : Theory) : Formula → Set where
-  Ax1 : ∀ φ ψ → T ⊢ φ ⊃ (ψ ⊃ φ)
+  Ax1 : ∀ φ ψ   → T ⊢ φ ⊃ (ψ ⊃ φ)
   Ax2 : ∀ φ ψ ρ → T ⊢ (φ ⊃ (ψ ⊃ ρ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ ρ))
-  Ax3 : ∀ φ ψ → T ⊢ (~ φ ⊃ ~ ψ) ⊃ (ψ ⊃ φ)
-  AxT : ∀ φ → T φ → T ⊢ φ
-  MP : ∀ φ ψ → T ⊢ φ → T ⊢ φ ⊃ ψ → T ⊢ ψ
+  Ax3 : ∀ φ ψ   → T ⊢ (~ φ ⊃ ~ ψ) ⊃ (ψ ⊃ φ)
+  AxT : ∀ φ     → T φ → T ⊢ φ
+  MP  : ∀ φ ψ   → T ⊢ φ → T ⊢ φ ⊃ ψ → T ⊢ ψ
 ```
 
 `φ` 不是 `T` 的定理时记作 `T ⊬ φ`.
