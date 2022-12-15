@@ -305,8 +305,8 @@ module _ (m n : Variable) where
 
   ｛A,A⊃B｝⊨B : ｛ A , A ⊃ B ｝ ⊨ B
   ｛A,A⊃B｝⊨B v v⊨ with v m   | v n  | v⊨ A (inj₁ refl) | v⊨ (A ⊃ B) (inj₂ refl)
-  ...               | _     | true | _                | _ = refl
-  ...               | false | _    | ()               | _
+  ...                | _     | true | _                | _ = refl
+  ...                | false | _    | ()               | _
 ```
 
 **【注意3.8】** 跟 `⊨ᵥ φ` 与 `⊨ᵥ ~ φ` 一样, `T ⊨ φ` 与 `T ⊨ ~ φ` 也并非必有一个成立. 然而, 如果 `T` 没有模型, 那么对任意 `φ` 都有 `T ⊨ φ`. 此时有 `T ⊨ φ` 和 `T ⊨ ~ φ` 同时成立.
