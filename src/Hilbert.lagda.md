@@ -242,8 +242,8 @@ Theory = Formula → Set
 给定理论 `T`. `T` 的非逻辑公理有时就简称为公理 (axiom). 理论又叫形式理论 (formal theory) 或公理系统 (axiom system). 给定公式 `φ` 和 `ψ`, 由它们组成的理论记作 `[ φ , ψ ]`.
 
 ```agda
-[_,_] : Formula → Formula → Theory
-[ φ , ψ ] ξ = ξ ≡ φ ⊎ ξ ≡ ψ
+｛_,_｝ : Formula → Formula → Theory
+｛ φ , ψ ｝ ξ = ξ ≡ φ ⊎ ξ ≡ ψ
 ```
 
 用 `φ` 扩张理论 `T` 得到的理论记作 `T + φ`.
@@ -296,15 +296,15 @@ T ⊭ φ = ∃[ v ] v ⊨ₘ T × v ⊭ᵥ φ
 ⊨⇒⊨ᵥ φ ⊨φ v = ⊨φ v λ _ ()
 ```
 
-**⟨例3.7⟩** 给定命题变元 `A` 和 `B`. `B` 是理论 `[ A , A ⊃ B ]` 的逻辑蕴涵.
+**⟨例3.7⟩** 给定命题变元 `A` 和 `B`. `B` 是理论 `｛ A , A ⊃ B ｝` 的逻辑蕴涵.
 
 ```agda
 module _ (m n : Variable) where
   private A = var m
   private B = var n
 
-  [A,A⊃B]⊨B : [ A , A ⊃ B ] ⊨ B
-  [A,A⊃B]⊨B v v⊨ with v m   | v n  | v⊨ A (inj₁ refl) | v⊨ (A ⊃ B) (inj₂ refl)
+  ｛A,A⊃B｝⊨B : ｛ A , A ⊃ B ｝ ⊨ B
+  ｛A,A⊃B｝⊨B v v⊨ with v m   | v n  | v⊨ A (inj₁ refl) | v⊨ (A ⊃ B) (inj₂ refl)
   ...               | _     | true | _                | _ = refl
   ...               | false | _    | ()               | _
 ```
@@ -378,7 +378,7 @@ Ax2 : (φ ⊃ (ψ ⊃ ρ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ ρ))
 Ax3 : (~ φ ⊃ ~ ψ) ⊃ (ψ ⊃ φ)
 
 $\mathfrak{S}_0$ 有且只有以下称为肯定前件 (Modus ponens) 的推理规则 MP:
-$$\frac{φ\;\;φ ⊃ ψ}{ψ}$$
+$$\dfrac{φ\;\;φ ⊃ ψ}{ψ} \\$$
 
 结合定义4.1和4.2, $\mathfrak{S}_0$ 中的可证关系 `_⊢_` 的形式化如下. 如定义4.1所说, `T ⊢ φ` 表示在 $\mathfrak{S}_0$ 中理论 `T` 可证命题 `φ`. 由于 `φ ⊃ (ψ ⊃ φ)` 是逻辑公理, $\mathfrak{S}_0$ 中的任意理论 `T` 都应该能证 `φ ⊃ (ψ ⊃ φ)`. 这正是 `_⊢_` 的构造子 `Ax1` 所描述的内容. `Ax2` 与 `Ax3` 亦同. `AxT` 是说 `T` 可证 `T` 中的元素, 也即非逻辑公理, 这也是理所应当的. 最后一行 `MP` 是说如果 `T` 能证 `φ` 且 `T` 能证 `φ ⊃ ψ` 那么 `T` 能证 `ψ`, 这对应定义4.2的推理规则.
 
