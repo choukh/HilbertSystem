@@ -36,13 +36,13 @@ extending : ∀ {T φ ψ} → T ⊢ ψ → T + φ ⊢ ψ
 extending (Ax1 _ _)   = Ax1 _ _
 extending (Ax2 _ _ _) = Ax2 _ _ _
 extending (Ax3 _ _)   = Ax3 _ _
-extending (AxT _ ψ∈T) = AxT _ (inj₁ ψ∈T)
+extending (Ax _ ψ∈T) = Ax _ (inj₁ ψ∈T)
 extending (MP _ _ T⊢ρ T⊢ρ⊃ψ) = MP _ _ (extending T⊢ρ) (extending T⊢ρ⊃ψ)
 ```
 
 ```agda
 deduction← : ∀ {T φ ψ} → T ⊢ φ ⊃ ψ → T + φ ⊢ ψ
-deduction← T⊢φ⊃ψ = MP _ _ (AxT _ (inj₂ refl)) (extending T⊢φ⊃ψ)
+deduction← T⊢φ⊃ψ = MP _ _ (Ax _ (inj₂ refl)) (extending T⊢φ⊃ψ)
 ```
 
 ```agda
@@ -50,14 +50,14 @@ deduction→ : ∀ {T φ ψ} → T + φ ⊢ ψ → T ⊢ φ ⊃ ψ
 deduction→ (Ax1 _ _)   = Ax1′ (Ax1 _ _)
 deduction→ (Ax2 _ _ _) = Ax1′ (Ax2 _ _ _)
 deduction→ (Ax3 _ _)   = Ax1′ (Ax3 _ _)
-deduction→ (AxT _ (inj₁ ψ∈T)) = Ax1′ (AxT _ ψ∈T)
-deduction→ (AxT _ (inj₂ refl)) = T⊢φ⊃φ
+deduction→ (Ax _ (inj₁ ψ∈T)) = Ax1′ (Ax _ ψ∈T)
+deduction→ (Ax _ (inj₂ refl)) = T⊢φ⊃φ
 deduction→ (MP _ _ T+φ⊢ρ T+φ⊢ρ⊃ψ) = Ax2′ (deduction→ T+φ⊢ρ⊃ψ) (deduction→ T+φ⊢ρ)
 ```
 
 ```agda
 [φ⊃ψ⊃ρ]⊃ψ⊃φ⊃ρ : ∀ φ ψ ρ → ⊢ (φ ⊃ ψ ⊃ ρ) ⊃ ψ ⊃ φ ⊃ ρ
 [φ⊃ψ⊃ρ]⊃ψ⊃φ⊃ρ φ ψ ρ = deduction→ (deduction→ (deduction→ ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ)) where
-  ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ = MP _ _ (AxT ψ (inj₁ (inj₂ refl))) ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ where
-    ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ = MP _ _ (AxT φ (inj₂ refl)) (AxT (φ ⊃ (ψ ⊃ ρ)) (inj₁ (inj₁ (inj₂ refl))))
+  ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ = MP _ _ (Ax ψ (inj₁ (inj₂ refl))) ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ where
+    ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ = MP _ _ (Ax φ (inj₂ refl)) (Ax (φ ⊃ (ψ ⊃ ρ)) (inj₁ (inj₁ (inj₂ refl))))
 ```
