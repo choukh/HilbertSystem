@@ -1,4 +1,4 @@
-# Hilbert-style deductive system for propositional logic in Agda
+# Hilbert Style Propositional Logic in Agda
 
 ## Features
 
