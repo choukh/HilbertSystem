@@ -7,9 +7,9 @@ zhihu-url: https://zhuanlan.zhihu.com/p/591923085
 # Agda命题逻辑(1) 希尔伯特系统
 
 > 交流Q群: 893531731  
-> 目录: [Everything.html](https://choukh.github.io/hilbert-prop/Everything.html)  
-> 本文源码: [Hilbert.lagda.md](https://github.com/choukh/hilbert-prop/blob/main/src/Hilbert.lagda.md)  
-> 高亮渲染: [Hilbert.html](https://choukh.github.io/hilbert-prop/Hilbert.html)  
+> 目录: [Everything.html](https://choukh.github.io/HilbertSystem/Everything.html)  
+> 本文源码: [Hilbert.lagda.md](https://github.com/choukh/HilbertSystem/blob/main/src/Hilbert.lagda.md)  
+> 高亮渲染: [Hilbert.html](https://choukh.github.io/HilbertSystem/Hilbert.html)  
 > 如果你在知乎看到本文: 知乎对Agda语法高亮的支持非常有限, 建议跳转到以上网站阅读  
 
 ## 0 前言
@@ -369,7 +369,12 @@ T⊭φ⇒v⊨T+~φ T φ (v , v⊨T , v⊭φ) = v , +-intro (~ φ) v⊨T v⊨~φ 
 
 此时我们说 φₙ 是 T 的定理 (theorem), 也说 φₙ 在 T 中可证 (provable), 记作 T ⊢ φₙ. 特别地, ∅ ⊢ φ 时我们说 φ 是 $\mathfrak{S}$ 的定理, 简记作 ⊢ φ.
 
-到目前为止, 我们并没有说逻辑公理和推理规则具体有哪些. 实际上, 数理逻辑的历史上提出了许多方案, 构成了多种命题逻辑系统. 代表性的有希尔伯特流, 根岑的自然演绎 NK 和 LK, Fitch流等等. 这些系统对于证明的定义都有一些微妙的区别, 且各有一些优缺点. 大体来说, 如果希望逻辑公理尽可能得少, 那么就不得不采用较多的推理规则, 此类系统的极致是自然演绎. 反过来, 如果希望推理规则尽可能得少, 那么就不得不采用较多的逻辑公理, 此类系统的极致就是希尔伯特流.
+到目前为止, 我们并没有说逻辑公理和推理规则具体有哪些. 实际上, 数理逻辑的历史上提出了许多方案, 构成了多种命题逻辑系统. 代表性的有希尔伯特流[3^], 根岑的自然演绎 NK 和 LK[4^], Fitch流[5^]等等. 这些系统对于证明的定义都有一些微妙的区别, 且各有一些优缺点. 大体来说, 如果希望逻辑公理尽可能得少, 那么就不得不采用较多的推理规则, 此类系统的极致是自然演绎. 反过来, 如果希望推理规则尽可能得少, 那么就不得不采用较多的逻辑公理, 此类系统的极致就是希尔伯特流.
+
+[3^]: https://en.wikipedia.org/wiki/List_of_Hilbert_systems
+[4^]: https://en.wikipedia.org/wiki/Natural_deduction
+[5^]: https://en.wikipedia.org/wiki/Fitch_notation
+
 
 不管哪种系统, 系统中可证的公式的集合, 也即系统中定理的集合, 与恒真式的集合都是相吻合的. 可证性, 也即证明的存在性和非存在性与逻辑系统的选取无关. 本文接下来介绍的系统属于希尔伯特流的一种, (仅在本文中) 记作 $\mathfrak{S}_0$. 具体地
 
@@ -389,8 +394,8 @@ data _⊢_ (T : Theory) : Formula → Set where
   Ax1 : ∀ φ ψ   → T ⊢ φ ⊃ ψ ⊃ φ
   Ax2 : ∀ φ ψ ρ → T ⊢ (φ ⊃ ψ ⊃ ρ) ⊃ (φ ⊃ ψ) ⊃ (φ ⊃ ρ)
   Ax3 : ∀ φ ψ   → T ⊢ (~ φ ⊃ ~ ψ) ⊃ ψ ⊃ φ
-  Ax : ∀ φ     →  T φ → T ⊢ φ
-  MP  : ∀ φ ψ   → T ⊢ φ → T ⊢ φ ⊃ ψ → T ⊢ ψ
+  Ax  : ∀ φ     → T φ → T ⊢ φ
+  MP  : ∀ {φ ψ} → T ⊢ φ → T ⊢ φ ⊃ ψ → T ⊢ ψ
 ```
 
 `φ` 不是 `T` 的定理时记作 `T ⊬ φ`.
@@ -441,15 +446,15 @@ MP-deductive v φ ψ v⊨φ v⊨φ⊃ψ
 (5) `MP` 的情况, 由归纳法有 `v ⊨ φ` 和 `v ⊨ φ ⊃ ψ`, 由 `MP` 的演绎性即证. ∎
 
 ```agda
-T⊢φ⇒v⊨φ : ∀ v T φ → v ⊨ₘ T → T ⊢ φ → v ⊨ᵥ φ
-T⊢φ⇒v⊨φ v _ _ _ (Ax1 φ ψ)   = Tauto1 φ ψ v
-T⊢φ⇒v⊨φ v _ _ _ (Ax2 φ ψ ρ) = Tauto2 φ ψ ρ v
-T⊢φ⇒v⊨φ v _ _ _ (Ax3 φ ψ)   = Tauto3 φ ψ v
-T⊢φ⇒v⊨φ _ _ φ v⊨T (Ax φ φ∈T) = v⊨T φ φ∈T
-T⊢φ⇒v⊨φ v T ψ v⊨T (MP φ ψ T⊢ψ T⊢φ⊃ψ) =
-  MP-deductive v φ ψ v⊨φ v⊨φ⊃ψ where
-  v⊨φ   = T⊢φ⇒v⊨φ v T φ       v⊨T T⊢ψ
-  v⊨φ⊃ψ = T⊢φ⇒v⊨φ v T (φ ⊃ ψ) v⊨T T⊢φ⊃ψ
+T⊢φ⇒v⊨φ : ∀ {v T φ} → v ⊨ₘ T → T ⊢ φ → v ⊨ᵥ φ
+T⊢φ⇒v⊨φ _ (Ax1 φ ψ)    = Tauto1 φ ψ _
+T⊢φ⇒v⊨φ _ (Ax2 φ ψ ρ)  = Tauto2 φ ψ ρ _
+T⊢φ⇒v⊨φ _ (Ax3 φ ψ)    = Tauto3 φ ψ _
+T⊢φ⇒v⊨φ v⊨T (Ax φ φ∈T) = v⊨T φ φ∈T
+T⊢φ⇒v⊨φ v⊨T (MP {φ} {ψ} T⊢ψ T⊢φ⊃ψ) =
+  MP-deductive _ φ ψ v⊨φ v⊨φ⊃ψ where
+  v⊨φ   = T⊢φ⇒v⊨φ v⊨T T⊢ψ
+  v⊨φ⊃ψ = T⊢φ⇒v⊨φ v⊨T T⊢φ⊃ψ
 ```
 
 **[推论4.7]** $\mathfrak{S}_0$ 具有可靠性.  
@@ -457,14 +462,14 @@ T⊢φ⇒v⊨φ v T ψ v⊨T (MP φ ψ T⊢ψ T⊢φ⊃ψ) =
 
 ```agda
 soundness : ∀ T φ → T ⊢ φ → T ⊨ φ
-soundness T φ T⊢φ v v⊨T = T⊢φ⇒v⊨φ v T φ v⊨T T⊢φ
+soundness T φ T⊢φ v v⊨T = T⊢φ⇒v⊨φ v⊨T T⊢φ
 ```
 
 **[推论4.8]** `T` 的元素都是恒真式时, `T` 的任意定理 `φ` 也都是恒真式. 特别地, $\mathfrak{S}_0$ 的定理都是恒真式. 反过来, 如果 `φ` 不是恒真式, 那么 `φ` 不是 $\mathfrak{S}_0$ 的定理.
 
 ```agda
 tauto-theory : ∀ T → (∀ φ → T φ → ⊨ᵥ φ) → ∀ φ → T ⊢ φ → ⊨ᵥ φ
-tauto-theory T H φ T⊢φ v = T⊢φ⇒v⊨φ v T φ (λ φ φ∈T → H φ φ∈T v) T⊢φ
+tauto-theory T H φ T⊢φ v = T⊢φ⇒v⊨φ (λ φ φ∈T → H φ φ∈T v) T⊢φ
 
 ⊢⇒⊨ : ∀ φ → ⊢ φ → ⊨ᵥ φ
 ⊢⇒⊨ φ ⊢φ = tauto-theory ∅ (λ _ ()) φ ⊢φ
@@ -481,10 +486,10 @@ $\mathfrak{S}_0$ 由于形式相对简单, 方便证明元定理, 如上面的 `
 证明: 如代码, 其理解留作练习. ∎
 
 ```agda
-T⊢φ⊃φ : ∀ {T φ} → T ⊢ φ ⊃ φ
-T⊢φ⊃φ {T} {φ} = MP _ _
+⊢φ⊃φ : ∀ {T} φ → T ⊢ φ ⊃ φ
+⊢φ⊃φ φ =        MP
               --/\
-       (Ax1 φ φ) (MP _ _
+       (Ax1 φ φ) (MP
                --/\
   (Ax1 φ (φ ⊃ φ)) (Ax2 φ (φ ⊃ φ) φ))
 ```
@@ -516,7 +521,7 @@ module _ (m : Variable) where
 
 ```agda
 φ⊃ψ⇒φ⇒ψ : ∀ T φ ψ → T ⊢ φ ⊃ ψ → T ⊢ φ → T ⊢ ψ
-φ⊃ψ⇒φ⇒ψ T φ ψ T⊢φ⊃ψ T⊢φ = MP φ ψ T⊢φ T⊢φ⊃ψ
+φ⊃ψ⇒φ⇒ψ T φ ψ T⊢φ⊃ψ T⊢φ = MP T⊢φ T⊢φ⊃ψ
 
 module _ where
   private A = var 0
