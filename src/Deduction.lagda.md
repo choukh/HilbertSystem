@@ -24,14 +24,14 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 ## 5 演绎定理
 
 ```agda
-Ax1′ : ∀ {T φ ψ} → T ⊢ ψ → T ⊢ φ ⊃ ψ
-Ax1′ T⊢ψ = MP T⊢ψ (Ax1 _ _)
+MP-Ax1 : ∀ {T φ ψ} → T ⊢ ψ → T ⊢ φ ⊃ ψ
+MP-Ax1 T⊢ψ = MP T⊢ψ (Ax1 _ _)
 
-Ax2′ : ∀ {T φ ψ ρ} → T ⊢ φ ⊃ (ψ ⊃ ρ) → T ⊢ φ ⊃ ψ → T ⊢ φ ⊃ ρ
-Ax2′ T⊢φψρ T⊢φψ = MP T⊢φψ (MP T⊢φψρ (Ax2 _ _ _))
+MP-Ax2 : ∀ {T φ ψ ρ} → T ⊢ φ ⊃ (ψ ⊃ ρ) → T ⊢ φ ⊃ ψ → T ⊢ φ ⊃ ρ
+MP-Ax2 T⊢φψρ T⊢φψ = MP T⊢φψ (MP T⊢φψρ (Ax2 _ _ _))
 
-Ax3′ : ∀ {T φ ψ} → T ⊢ ~ φ ⊃ ~ ψ → T ⊢ ψ ⊃ φ
-Ax3′ T⊢~φ⊃~ψ = MP T⊢~φ⊃~ψ (Ax3 _ _)
+MP-Ax3 : ∀ {T φ ψ} → T ⊢ ~ φ ⊃ ~ ψ → T ⊢ ψ ⊃ φ
+MP-Ax3 T⊢~φ⊃~ψ = MP T⊢~φ⊃~ψ (Ax3 _ _)
 ```
 
 ```agda
@@ -50,34 +50,64 @@ deduction← T⊢φ⊃ψ = MP (Ax _ (inj₂ refl)) (extending T⊢φ⊃ψ)
 
 ```agda
 deduction : ∀ {T φ ψ} → T + φ ⊢ ψ → T ⊢ φ ⊃ ψ
-deduction (Ax1 _ _)   = Ax1′ (Ax1 _ _)
-deduction (Ax2 _ _ _) = Ax1′ (Ax2 _ _ _)
-deduction (Ax3 _ _)   = Ax1′ (Ax3 _ _)
-deduction (Ax _ (inj₁ ψ∈T)) = Ax1′ (Ax _ ψ∈T)
+deduction (Ax1 _ _)   = MP-Ax1 (Ax1 _ _)
+deduction (Ax2 _ _ _) = MP-Ax1 (Ax2 _ _ _)
+deduction (Ax3 _ _)   = MP-Ax1 (Ax3 _ _)
+deduction (Ax _ (inj₁ ψ∈T)) = MP-Ax1 (Ax _ ψ∈T)
 deduction (Ax _ (inj₂ refl)) = ⊢φ⊃φ _
-deduction (MP T+φ⊢ρ T+φ⊢ρ⊃ψ) = Ax2′ (deduction T+φ⊢ρ⊃ψ) (deduction T+φ⊢ρ)
+deduction (MP T+φ⊢ρ T+φ⊢ρ⊃ψ) = MP-Ax2 (deduction T+φ⊢ρ⊃ψ) (deduction T+φ⊢ρ)
 ```
 
 ```agda
-⊢[φ⊃ψ⊃ρ]⊃ψ⊃φ⊃ρ : ∀ φ ψ ρ → ⊢ (φ ⊃ ψ ⊃ ρ) ⊃ ψ ⊃ φ ⊃ ρ
-⊢[φ⊃ψ⊃ρ]⊃ψ⊃φ⊃ρ φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ)) where
+swap-premise : ∀ {T} φ ψ ρ → T ⊢ (φ ⊃ ψ ⊃ ρ) ⊃ ψ ⊃ φ ⊃ ρ
+swap-premise φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ)) where
   ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ = MP (Ax ψ (inj₁ (inj₂ refl))) ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ where
     ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ = MP (Ax φ (inj₂ refl)) (Ax (φ ⊃ (ψ ⊃ ρ)) (inj₁ (inj₁ (inj₂ refl))))
-```
 
-```agda
-⊢[φ⊃ψ]⊃[ψ⊃ρ]⊃[φ⊃ρ] : ∀ φ ψ ρ → ⊢ (φ ⊃ ψ) ⊃ (ψ ⊃ ρ) ⊃ φ ⊃ ρ
-⊢[φ⊃ψ]⊃[ψ⊃ρ]⊃[φ⊃ρ] φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ρ)) where
+syllogism : ∀ {T} φ ψ ρ → T ⊢ (φ ⊃ ψ) ⊃ (ψ ⊃ ρ) ⊃ φ ⊃ ρ
+syllogism φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ρ)) where
   ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ρ = MP ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ψ (Ax (ψ ⊃ ρ) (inj₁ (inj₂ refl))) where
     ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ψ = MP (Ax φ (inj₂ refl)) (Ax (φ ⊃ ψ) (inj₁ (inj₁ (inj₂ refl))))
+
+MP-syllogism : ∀ {T φ ψ ρ} → T ⊢ φ ⊃ ψ → T ⊢ ψ ⊃ ρ → T ⊢ φ ⊃ ρ
+MP-syllogism T⊢φ⊃ψ T⊢ψ⊃ρ = MP T⊢ψ⊃ρ (MP T⊢φ⊃ψ (syllogism _ _ _))
+
+explosion : ∀ {T} φ ψ → T ⊢ ~ φ ⊃ φ ⊃ ψ
+explosion φ ψ = deduction (MP-Ax3 (MP-Ax1 (Ax (~ φ) (inj₂ refl))))
+
+DN : ∀ {T} φ → T ⊢ ~ ~ φ ⊃ φ
+DN φ = deduction (MP (⊢φ⊃φ φ) (MP-Ax3 (deduction← (explosion _ _))))
+
+DN← : ∀ {T} φ → T ⊢ φ ⊃ ~ ~ φ
+DN← φ = MP-Ax3 (DN (~ φ))
+
+contraposition : ∀ {T} φ ψ → T ⊢ (φ ⊃ ψ) ⊃ ~ ψ ⊃ ~ φ
+contraposition φ ψ = deduction (MP-Ax3 (MP-syllogism ｛φ⊃ψ｝⊢~~φ⊃ψ (DN← ψ))) where
+  ｛φ⊃ψ｝⊢~~φ⊃ψ = MP-syllogism (DN φ) (Ax (φ ⊃ ψ) (inj₂ refl))
+
+MP-contraposition : ∀ {T φ ψ} → T ⊢ φ ⊃ ψ → T ⊢ ~ ψ ⊃ ~ φ
+MP-contraposition T⊢φ⊃ψ = MP T⊢φ⊃ψ (contraposition _ _)
+
+⊢[φ⊃~φ]⊃~φ : ∀ {T} φ → T ⊢ (φ ⊃ ~ φ) ⊃ ~ φ
+⊢[φ⊃~φ]⊃~φ φ = deduction (MP (⊢φ⊃φ φ) ｛φ⊃~φ｝⊢[φ⊃φ]⊃~φ) where
+  ｛φ⊃~φ｝⊢[φ⊃φ]⊃~φ = MP-Ax3 (MP-syllogism (DN φ) ｛φ⊃~φ｝⊢φ⊃~φ⊃φ) where
+    ｛φ⊃~φ｝⊢φ⊃~φ⊃φ = MP-Ax2 (MP-syllogism (deduction← (⊢φ⊃φ _)) (explosion _ _)) (⊢φ⊃φ φ)
+
+contradiction : ∀ {T φ} → T + ~ φ ⊢ φ → T ⊢ φ
+contradiction {T} {φ} T+~φ⊢φ = MP (MP (deduction (MP T+~φ⊢φ (DN← φ))) (⊢[φ⊃~φ]⊃~φ (~ φ))) (DN φ)
+
+⊢[~φ⊃φ]⊃φ : ∀ {T} φ → T ⊢ (~ φ ⊃ φ) ⊃ φ
+⊢[~φ⊃φ]⊃φ φ = deduction (contradiction (MP (Ax (~ φ) (inj₂ refl)) (Ax (~ φ ⊃ φ) (inj₁ (inj₂ refl)))))
+
+⊢[φ⊃ψ]⊃[~φ⊃ψ]⊃ψ : ∀ {T} φ ψ → T ⊢ (φ ⊃ ψ) ⊃ (~ φ ⊃ ψ) ⊃ ψ
+⊢[φ⊃ψ]⊃[~φ⊃ψ]⊃ψ {T} φ ψ = deduction (deduction (
+  contradiction (MP helper (Ax (~ φ ⊃ ψ) (inj₁ (inj₂ refl)))))) where
+    helper : T + (φ ⊃ ψ) + (~ φ ⊃ ψ) + ~ ψ ⊢ ~ φ
+    helper = deduction← (MP-contraposition (Ax (φ ⊃ ψ) (inj₁ (inj₂ refl))))
 ```
 
 ```agda
-⊢~φ⊃φ⊃ψ : ∀ φ ψ → ⊢ ~ φ ⊃ φ ⊃ ψ
-⊢~φ⊃φ⊃ψ φ ψ = deduction (Ax3′ (Ax1′ (Ax (~ φ) (inj₂ refl))))
-```
-
-```agda
---⊢~~φ⊃φ : ∀ φ → ⊢ ~ ~ φ ⊃ φ
---⊢~~φ⊃φ φ = {!   !}
+Peirce : ∀ {T} φ ψ → T ⊢ ((φ ⊃ ψ) ⊃ φ) ⊃ φ
+Peirce φ ψ = deduction (contradiction (
+  MP (deduction← (explosion φ ψ)) (Ax ((φ ⊃ ψ) ⊃ φ) (inj₁ (inj₂ refl)))))
 ```
