@@ -63,7 +63,9 @@ swap-premise : ∀ {T} φ ψ ρ → T ⊢ (φ ⊃ ψ ⊃ ρ) ⊃ ψ ⊃ φ ⊃ �
 swap-premise φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ)) where
   ｛φ⊃ψ⊃ρ,ψ,φ⊃ρ｝⊢ρ = MP (Ax ψ (inj₁ (inj₂ refl))) ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ where
     ｛φ⊃ψ⊃ρ,ψ,φ｝⊢ψ⊃ρ = MP (Ax φ (inj₂ refl)) (Ax (φ ⊃ (ψ ⊃ ρ)) (inj₁ (inj₁ (inj₂ refl))))
+```
 
+```agda
 syllogism : ∀ {T} φ ψ ρ → T ⊢ (φ ⊃ ψ) ⊃ (ψ ⊃ ρ) ⊃ φ ⊃ ρ
 syllogism φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ρ)) where
   ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ρ = MP ｛φ⊃ψ,ψ⊃ρ,φ｝⊢ψ (Ax (ψ ⊃ ρ) (inj₁ (inj₂ refl))) where
@@ -71,34 +73,50 @@ syllogism φ ψ ρ = deduction (deduction (deduction ｛φ⊃ψ,ψ⊃ρ,φ｝⊢
 
 MP-syllogism : ∀ {T φ ψ ρ} → T ⊢ φ ⊃ ψ → T ⊢ ψ ⊃ ρ → T ⊢ φ ⊃ ρ
 MP-syllogism T⊢φ⊃ψ T⊢ψ⊃ρ = MP T⊢ψ⊃ρ (MP T⊢φ⊃ψ (syllogism _ _ _))
+```
 
+```agda
 explosion : ∀ {T} φ ψ → T ⊢ ~ φ ⊃ φ ⊃ ψ
 explosion φ ψ = deduction (MP-Ax3 (MP-Ax1 (Ax (~ φ) (inj₂ refl))))
+```
 
+```agda
 DN : ∀ {T} φ → T ⊢ ~ ~ φ ⊃ φ
 DN φ = deduction (MP (⊢φ⊃φ φ) (MP-Ax3 (deduction← (explosion _ _))))
+```
 
+```agda
 DN← : ∀ {T} φ → T ⊢ φ ⊃ ~ ~ φ
 DN← φ = MP-Ax3 (DN (~ φ))
+```
 
+```agda
 contraposition : ∀ {T} φ ψ → T ⊢ (φ ⊃ ψ) ⊃ ~ ψ ⊃ ~ φ
 contraposition φ ψ = deduction (MP-Ax3 (MP-syllogism ｛φ⊃ψ｝⊢~~φ⊃ψ (DN← ψ))) where
   ｛φ⊃ψ｝⊢~~φ⊃ψ = MP-syllogism (DN φ) (Ax (φ ⊃ ψ) (inj₂ refl))
 
 MP-contraposition : ∀ {T φ ψ} → T ⊢ φ ⊃ ψ → T ⊢ ~ ψ ⊃ ~ φ
 MP-contraposition T⊢φ⊃ψ = MP T⊢φ⊃ψ (contraposition _ _)
+```
 
+```agda
 ⊢[φ⊃~φ]⊃~φ : ∀ {T} φ → T ⊢ (φ ⊃ ~ φ) ⊃ ~ φ
 ⊢[φ⊃~φ]⊃~φ φ = deduction (MP (⊢φ⊃φ φ) ｛φ⊃~φ｝⊢[φ⊃φ]⊃~φ) where
   ｛φ⊃~φ｝⊢[φ⊃φ]⊃~φ = MP-Ax3 (MP-syllogism (DN φ) ｛φ⊃~φ｝⊢φ⊃~φ⊃φ) where
     ｛φ⊃~φ｝⊢φ⊃~φ⊃φ = MP-Ax2 (MP-syllogism (deduction← (⊢φ⊃φ _)) (explosion _ _)) (⊢φ⊃φ φ)
+```
 
+```agda
 contradiction : ∀ {T φ} → T + ~ φ ⊢ φ → T ⊢ φ
 contradiction {T} {φ} T+~φ⊢φ = MP (MP (deduction (MP T+~φ⊢φ (DN← φ))) (⊢[φ⊃~φ]⊃~φ (~ φ))) (DN φ)
+```
 
+```agda
 ⊢[~φ⊃φ]⊃φ : ∀ {T} φ → T ⊢ (~ φ ⊃ φ) ⊃ φ
 ⊢[~φ⊃φ]⊃φ φ = deduction (contradiction (MP (Ax (~ φ) (inj₂ refl)) (Ax (~ φ ⊃ φ) (inj₁ (inj₂ refl)))))
+```
 
+```agda
 ⊢[φ⊃ψ]⊃[~φ⊃ψ]⊃ψ : ∀ {T} φ ψ → T ⊢ (φ ⊃ ψ) ⊃ (~ φ ⊃ ψ) ⊃ ψ
 ⊢[φ⊃ψ]⊃[~φ⊃ψ]⊃ψ {T} φ ψ = deduction (deduction (
   contradiction (MP helper (Ax (~ φ ⊃ ψ) (inj₁ (inj₂ refl)))))) where
@@ -108,6 +126,7 @@ contradiction {T} {φ} T+~φ⊢φ = MP (MP (deduction (MP T+~φ⊢φ (DN← φ))
 
 ```agda
 Peirce : ∀ {T} φ ψ → T ⊢ ((φ ⊃ ψ) ⊃ φ) ⊃ φ
-Peirce φ ψ = deduction (contradiction (
-  MP (deduction← (explosion φ ψ)) (Ax ((φ ⊃ ψ) ⊃ φ) (inj₁ (inj₂ refl)))))
+Peirce φ ψ = deduction (contradiction (MP (deduction← (explosion φ ψ)) (Ax ((φ ⊃ ψ) ⊃ φ) (inj₁ (inj₂ refl)))))
 ```
+
+## 6 一致性
