@@ -17,7 +17,7 @@ module Everything where
 open import Hilbert public
 ```
 
-### (2) 演绎定理与一致性
+### (2) 演绎定理
 
 ```agda
 open import Deduction public
